@@ -59,7 +59,19 @@ enum WarriorSpells
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_1     = 64849,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
-    SPELL_WARRIOR_VENGEANCE                         = 76691
+    SPELL_WARRIOR_VENGEANCE                         = 76691,
+    SPELL_WARRIOR_CLEAVE                            = 845,
+    SPELL_WARRIOR_EXECUTIONER_1                     = 20502,
+    SPELL_WARRIOR_EXECUTIONER_2                     = 20503,
+    SPELL_WARRIOR_EXECUTIONER_TRIGGERED             = 90806,
+    SPELL_WARRIOR_BLOODSURGE_1                      = 46913,
+    SPELL_WARRIOR_BLOODSURGE_2                      = 46914,
+    SPELL_WARRIOR_BLOODSURGE_3                      = 46915,
+    SPELL_WARRIOR_BLOODSURGE_TRIGGERED              = 46916,
+    SPELL_WARRIOR_BATTLE_TRANCE_1                   = 85741,
+    SPELL_WARRIOR_BATTLE_TRANCE_2                   = 85742,
+    SPELL_WARRIOR_BATTLE_TRANCE_3                   = 12322,
+    SPELL_WARRIOR_BATTLE_TRANCE_TRIGGERED           = 12964,
 };
 
 enum WarriorSpellIcons
@@ -102,6 +114,11 @@ class spell_warr_bloodthirst : public SpellScriptLoader
             {
                 int32 damage = GetEffectValue();
                 GetCaster()->CastCustomSpell(GetCaster(), SPELL_WARRIOR_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
+
+                if((GetCaster()->HasAura(SPELL_WARRIOR_BLOODSURGE_1) && roll_chance_i(10))
+	                || (GetCaster()->HasAura(SPELL_WARRIOR_BLOODSURGE_2) && roll_chance_i(20))
+	                || (GetCaster()->HasAura(SPELL_WARRIOR_BLOODSURGE_3) && roll_chance_i(30)))
+	                GetCaster()->CastSpell(GetCaster(), SPELL_WARRIOR_BLOODSURGE_TRIGGERED, true);
             }
 
             void Register() OVERRIDE
@@ -305,6 +322,9 @@ class spell_warr_execute : public SpellScriptLoader
                     /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
                     int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
                     SetHitDamage(baseDamage + moreDamage);
+
+                    if((caster->HasAura(SPELL_WARRIOR_EXECUTIONER_1) && roll_chance_i(50)) || caster->HasAura(SPELL_WARRIOR_EXECUTIONER_2))
+                        caster->CastSpell(caster,SPELL_WARRIOR_EXECUTIONER_TRIGGERED, true);
                 }
             }
 
@@ -1058,6 +1078,67 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         }
 };
 
+// Cleave
+class spell_warr_cleave : public SpellScriptLoader
+{
+    public:
+        spell_warr_cleave() : SpellScriptLoader("spell_warr_cleave") { }
+
+        class spell_warr_cleave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_cleave_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effect*/)
+            {
+                // Formula: 6 + AttackPower * 0.45
+                if (Unit* caster = GetCaster())
+                {
+                SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
+                }
+            }
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+        return new spell_warr_cleave_SpellScript();
+
+        }
+};
+
+// Death Strike, Bloodthirst and Shield slam
+// Need correct SpellFamilyFlag in spell_proc_event
+class spell_warr_battle_trance : public SpellScriptLoader
+{
+    public:
+        spell_warr_battle_trance() : SpellScriptLoader("spell_warr_battle_trance") { }
+
+        class spell_warr_battle_trance_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_battle_trance_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if((GetCaster()->HasAura(SPELL_WARRIOR_BATTLE_TRANCE_1) && roll_chance_i(5))
+                    || (GetCaster()->HasAura(SPELL_WARRIOR_BATTLE_TRANCE_2) && roll_chance_i(10))
+                    || (GetCaster()->HasAura(SPELL_WARRIOR_BATTLE_TRANCE_3) && roll_chance_i(15)))
+                GetCaster()->CastSpell(GetCaster(), SPELL_WARRIOR_BATTLE_TRANCE_TRIGGERED, true);
+            }
+
+            void Register() OVERRIDE
+            {
+            OnEffectHit += SpellEffectFn(spell_warr_battle_trance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ANY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warr_battle_trance_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1085,4 +1166,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victorious();
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
+    new spell_warr_cleave();
+    new spell_warr_battle_trance();
 }
