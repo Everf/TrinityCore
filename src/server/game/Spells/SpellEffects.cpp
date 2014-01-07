@@ -3218,6 +3218,19 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 }
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR)
+                {
+                    //Rude Interruption (Rank 1)
+                    if (m_caster->HasAura(61216))
+                    {
+                        m_caster->CastSpell(m_caster,86662,true);
+                    }
+                    //Rude Interruption (Rank 2)
+                    if (m_caster->HasAura(61221))
+                    {
+                        m_caster->CastSpell(m_caster,86663,true);
+                    }
+                }
             }
         }
     }
@@ -3877,6 +3890,32 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     // Frost Fever
                     if (m_targets.GetUnitTarget()->GetAura(55095))
                         m_caster->CastSpell(unitTarget, 55095, true);
+                }
+            }
+            // Festering Strike
+            else if (m_spellInfo->Id == 85948)
+            {
+                Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                {
+                    AuraEffect const* aurEff = *i;
+                    SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+                    // search our Blood Plague and Frost Fever on target
+                    if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags[2] & 0x2 &&
+                        aurEff->GetCasterGUID() == m_caster->GetGUID())
+                    {
+                        uint32 countMin = aurEff->GetBase()->GetMaxDuration();
+                        uint32 countMax = spellInfo->GetMaxDuration();
+                        aurEff->GetBase()->SetDuration(aurEff->GetBase()->GetDuration() + 6000);
+                        aurEff->GetBase()->SetMaxDuration(countMin + 6000);
+                    }
+                }
+                if(Aura *pAura = unitTarget->GetAura(45524, GetCaster()->GetGUID()))
+                {
+                    uint32 countMin = pAura->GetMaxDuration();
+                    uint32 countMax = pAura->GetSpellInfo()->GetMaxDuration();
+                    pAura->SetDuration(pAura->GetDuration() + 6000);
+                    pAura->SetMaxDuration(countMin + 6000);
                 }
             }
             break;
