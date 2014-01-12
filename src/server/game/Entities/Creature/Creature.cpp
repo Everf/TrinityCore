@@ -558,6 +558,20 @@ void Creature::Update(uint32 diff)
                     m_regenTimer -= diff;
             }
 
+            uint32 m_evadeTimer = 30000; // 30 seconds
+            // Hacky fix for evade mode creatures
+            if (IsInEvadeMode() && m_evadeTimer > 0)
+            {
+                if (diff >= m_evadeTimer)
+                {
+                    m_evadeTimer = 0;
+                    Respawn(true);
+                    break;
+                }
+                else
+                    m_evadeTimer -= diff;
+            }
+
             if (m_regenTimer != 0)
                break;
 
