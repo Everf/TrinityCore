@@ -1547,7 +1547,6 @@ void Spell::EffectCreateItem(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
-
     DoCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
     ExecuteLogEffectCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
 }
@@ -1561,6 +1560,13 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
         return;
 
     Player* player = unitTarget->ToPlayer();
+
+    if (m_spellInfo->Id == 73227)
+    {
+        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+            if (player->GetQuestStatus(25158) == QUEST_STATUS_INCOMPLETE)
+                player->KilledMonsterCredit(39221);
+    }
 
     uint32 item_id = m_spellInfo->Effects[effIndex].ItemType;
 

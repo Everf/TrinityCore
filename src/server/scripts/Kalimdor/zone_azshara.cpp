@@ -15,6 +15,90 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+enum
+{
+    QUEST_READY_THE_GROUND_TROOPS   = 26374,
+    QUEST_SMOOTS_SAMOPHLANGE        = 26361,
+    QUEST_BEATING_THE_MARKET        = 26337,
+};
+
+#define GOSSIP_SQUIRE_ITEM_DISCIPLINE "Discipline AWOL Tropp"
+#define GOSSIP_SQUIRE_ITEM_INTIMIDATE "Intimidate Bilgewater"
+
+class npc_awol_troop : public CreatureScript
+{
+public:
+    npc_awol_troop() : CreatureScript("npc_awol_troop") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_READY_THE_GROUND_TROOPS) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_DISCIPLINE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            player->KilledMonsterCredit(42893);
+            player->CLOSE_GOSSIP_MENU();
+        }
+        return true;
+    }
+};
+
+class npc_smoot : public CreatureScript
+{
+public:
+    npc_smoot() : CreatureScript("npc_smoot") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_SMOOTS_SAMOPHLANGE) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->AddItem(58224, 1);
+        }
+        return true;
+    }
+};
+
+class npc_bilgewater_dockworker : public CreatureScript
+{
+public:
+    npc_bilgewater_dockworker() : CreatureScript("npc_bilgewater_dockworker") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (player->GetQuestStatus(QUEST_BEATING_THE_MARKET) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_INTIMIDATE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        }
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            player->KilledMonsterCredit(42798);
+            player->CLOSE_GOSSIP_MENU();
+        }
+        return true;
+    }
+};
+
 void AddSC_azshara()
 {
+    new npc_awol_troop();
+    new npc_smoot();
+    new npc_bilgewater_dockworker();
 }
