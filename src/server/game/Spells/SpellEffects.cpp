@@ -1564,8 +1564,20 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
     if (m_spellInfo->Id == 73227)
     {
         if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-            if (player->GetQuestStatus(25158) == QUEST_STATUS_INCOMPLETE)
+            if (player->GetQuestStatus(25158) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(25105) == QUEST_STATUS_INCOMPLETE)
                 player->KilledMonsterCredit(39221);
+    }
+    else if (m_spellInfo->Id == 73243)
+    {
+        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+            if (player->GetQuestStatus(25160) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(25154) == QUEST_STATUS_INCOMPLETE)
+                player->KilledMonsterCredit(39222);
+    }
+    else if (m_spellInfo->Id == 73274)
+    {
+        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+            if (player->GetQuestStatus(25161) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(25155) == QUEST_STATUS_INCOMPLETE)
+                player->KilledMonsterCredit(39223);
     }
 
     uint32 item_id = m_spellInfo->Effects[effIndex].ItemType;
