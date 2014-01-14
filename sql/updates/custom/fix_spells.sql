@@ -32,3 +32,6 @@ INSERT INTO spell_script_names VALUES
 
 DELETE FROM spell_script_names WHERE spell_id IN (845);
 INSERT INTO spell_script_names VALUES (845, 'spell_warr_cleave');
+
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_warr_intercept';
+INSERT INTO spell_script_names VALUES (20253, 'spell_warr_intercept');

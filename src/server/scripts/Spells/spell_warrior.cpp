@@ -31,6 +31,7 @@ enum WarriorSpells
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_CHARGE                            = 34846,
+    SPELL_WARRIOR_CHARGE_STUN                       = 96273,
     SPELL_WARRIOR_COLOSSUS_SMASH                    = 86346,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                = 12162,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_2                = 12850,
@@ -72,6 +73,9 @@ enum WarriorSpells
     SPELL_WARRIOR_BATTLE_TRANCE_2                   = 85742,
     SPELL_WARRIOR_BATTLE_TRANCE_3                   = 12322,
     SPELL_WARRIOR_BATTLE_TRANCE_TRIGGERED           = 12964,
+    SPELL_WARRIOR_INTERCEPT                         = 20252,
+    SPELL_WARRIOR_INTERCEPT_COOLDOWN                = 96216,
+    SPELL_WARRIOR_CHARGUE_COOLDOWN                  = 96215,
 };
 
 enum WarriorSpellIcons
@@ -176,7 +180,8 @@ class spell_warr_charge : public SpellScriptLoader
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT) ||
                     !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_INTERCEPT_COOLDOWN))
                     return false;
                 return true;
             }
@@ -189,7 +194,10 @@ class spell_warr_charge : public SpellScriptLoader
 
                 // Juggernaut crit bonus
                 if (caster->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
+                {
                     caster->CastSpell(caster, SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF, true);
+                    caster->CastSpell(caster, SPELL_WARRIOR_INTERCEPT_COOLDOWN, false);
+                }
             }
 
             void Register() OVERRIDE
@@ -1093,7 +1101,7 @@ class spell_warr_cleave : public SpellScriptLoader
                 // Formula: 6 + AttackPower * 0.45
                 if (Unit* caster = GetCaster())
                 {
-                SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
+                    SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
                 }
             }
             void Register()
@@ -1139,6 +1147,44 @@ class spell_warr_battle_trance : public SpellScriptLoader
         }
 };
 
+/// Updated 4.3.4
+class spell_warr_intercept : public SpellScriptLoader
+{
+    public:
+        spell_warr_intercept() : SpellScriptLoader("spell_warr_intercept") { }
+
+        class spell_warr_intercept_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_intercept_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if(GetCaster()->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
+                    GetCaster()->CastSpell(GetCaster(), SPELL_WARRIOR_CHARGUE_COOLDOWN, false);
+            }
+
+            void CalculateDamage(SpellEffIndex /*effect*/)
+            {
+                // Formula: 1 + AttackPower * 0.12
+                if (Unit* caster = GetCaster())
+                {
+                    SetHitDamage(int32(1 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f));
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHit += SpellEffectFn(spell_warr_intercept_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ANY);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_intercept::spell_warr_intercept_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_warr_intercept_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1168,4 +1214,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_vigilance_trigger();
     new spell_warr_cleave();
     new spell_warr_battle_trance();
+    new spell_warr_intercept();
 }
