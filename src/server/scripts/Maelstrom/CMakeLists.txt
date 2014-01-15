@@ -8,7 +8,9 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
-  Maelstrom/kezan.cpp
+  Maelstrom/zone_kezan.cpp
+  Maelstrom/zone_deepholm.cpp
+  Maelstrom/zone_lost_islands.cpp
 )
 
 message("  -> Prepared: The Maelstrom")

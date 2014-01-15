@@ -123,9 +123,21 @@ set(scripts_STAT_SRCS
   Kalimdor/HallsOfOrigination/boss_temple_guardian_anhuur.cpp
   Kalimdor/HallsOfOrigination/boss_earthrager_ptah.cpp
   Kalimdor/HallsOfOrigination/boss_anraphet.cpp
+  Kalimdor/HallsOfOrigination/boss_isiset.cpp
+  Kalimdor/HallsOfOrigination/boss_rajh.cpp
+  Kalimdor/HallsOfOrigination/boss_ammunae.cpp
+  Kalimdor/HallsOfOrigination/boss_setesh.cpp
   Kalimdor/Firelands/instance_firelands.cpp
   Kalimdor/Firelands/firelands.h
   Kalimdor/Firelands/boss_alysrazor.cpp
+  Kalimdor/zone_uldum.cpp
+  Kalimdor/zone_mount_hyjal.cpp
+  Kalimdor/LostCityOfTolVir/boss_siamat.cpp
+  Kalimdor/LostCityOfTolVir/boss_high_prophet_barim.cpp
+  Kalimdor/LostCityOfTolVir/boss_lockmaw_augh.cpp
+  Kalimdor/LostCityOfTolVir/boss_general_husam.cpp
+  Kalimdor/LostCityOfTolVir/instance_lost_city_of_tol_vir.cpp
+  Kalimdor/LostCityOfTolVir/lost_city_of_tol_vir.h
 )
 
 message("  -> Prepared: Kalimdor")

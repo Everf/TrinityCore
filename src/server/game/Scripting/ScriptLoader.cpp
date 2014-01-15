@@ -279,6 +279,9 @@ void AddSC_undercity();
 void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
+void AddSC_twilight_highlands();
+void AddSC_tol_barad();
+void AddSC_vashjir();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -350,12 +353,21 @@ void AddSC_instance_wailing_caverns();
 void AddSC_boss_zum_rah();                   //Zul'Farrak
 void AddSC_zulfarrak();
 void AddSC_instance_zulfarrak();
-void AddSC_instance_halls_of_origination();
-void AddSC_boss_temple_guardian_anhuur();
+void AddSC_boss_temple_guardian_anhuur();    //Halls of origination
 void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
+void AddSC_boss_isiset();
+void AddSC_boss_rajh();
+void AddSC_boss_ammunae();
+void AddSC_boss_setesh();
+void AddSC_instance_halls_of_origination();
+void AddSC_boss_general_husam();             //Lost city of tol'vir
+void AddSC_boss_lockmaw_augh();
+void AddSC_boss_high_prophet_barim();
+void AddSC_boss_siamat();
+void AddSC_instance_lost_city_of_tol_vir();
+void AddSC_boss_alysrazor();                 //Firelands
 void AddSC_instance_firelands();
-void AddSC_boss_alysrazor();
 
 void AddSC_ashenvale();
 void AddSC_azshara();
@@ -379,6 +391,8 @@ void AddSC_thousand_needles();
 void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
+void AddSC_uldum();
+void AddSC_mount_hyjal();
 
 // Northrend
 
@@ -677,6 +691,8 @@ void AddSC_zangarmarsh();
 
 // Maelstrom
 void AddSC_kezan();
+void AddSC_lost_islands();
+void AddSC_deepholm();
 
 // Events
 void AddSC_event_childrens_week();
