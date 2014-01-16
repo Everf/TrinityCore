@@ -1096,15 +1096,6 @@ class spell_warr_cleave : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_cleave_SpellScript);
 
-            /*void CalculateDamage(SpellEffIndex effect)
-            {
-                // Formula: 6 + AttackPower * 0.45
-                if (Unit* caster = GetCaster())
-                {
-                    SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
-                }
-            }*/
-
             void HandleDamage(SpellEffIndex /*effIndex*/)
             {
                 int32 damage = 0;
