@@ -1096,17 +1096,30 @@ class spell_warr_cleave : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_cleave_SpellScript);
 
-            void CalculateDamage(SpellEffIndex /*effect*/)
+            /*void CalculateDamage(SpellEffIndex effect)
             {
                 // Formula: 6 + AttackPower * 0.45
                 if (Unit* caster = GetCaster())
                 {
                     SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
                 }
+            }*/
+
+            void HandleDamage(SpellEffIndex /*effIndex*/)
+            {
+                int32 damage = 0;
+                if (Unit* target = GetHitUnit())
+                {
+                    damage = (6 + GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f);
+                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                    damage = target->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                }
+                SetHitDamage(damage);
             }
+
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_cleave_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
         SpellScript* GetSpellScript() const OVERRIDE
@@ -1137,7 +1150,7 @@ class spell_warr_battle_trance : public SpellScriptLoader
 
             void Register() OVERRIDE
             {
-            OnEffectHit += SpellEffectFn(spell_warr_battle_trance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ANY);
+                OnEffectHit += SpellEffectFn(spell_warr_battle_trance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ANY);
             }
         };
 
@@ -1163,19 +1176,22 @@ class spell_warr_intercept : public SpellScriptLoader
                     GetCaster()->CastSpell(GetCaster(), SPELL_WARRIOR_CHARGUE_COOLDOWN, false);
             }
 
-            void CalculateDamage(SpellEffIndex /*effect*/)
+            void HandleDamage(SpellEffIndex /*effIndex*/)
             {
-                // Formula: 1 + AttackPower * 0.12
-                if (Unit* caster = GetCaster())
+                int32 damage = 0;
+                if (Unit* target = GetHitUnit())
                 {
-                    SetHitDamage(int32(1 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f));
+                    damage = (1 + GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f);
+                    damage = GetCaster()->SpellDamageBonusDone(target, GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                    damage = target->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
                 }
+                SetHitDamage(damage);
             }
 
             void Register() OVERRIDE
             {
                 OnEffectHit += SpellEffectFn(spell_warr_intercept_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ANY);
-                OnEffectHitTarget += SpellEffectFn(spell_warr_intercept::spell_warr_intercept_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_intercept_SpellScript::HandleDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
