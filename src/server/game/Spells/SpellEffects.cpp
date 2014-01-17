@@ -614,7 +614,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     else
                         // or guardian
                         spell_id = 46585;
-                    m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
                     m_caster->ToPlayer()->RemoveSpellCooldown(spell_id, true);
                     m_caster->CastSpell(m_caster, spell_id, true);
                     break;
