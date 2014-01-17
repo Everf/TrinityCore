@@ -1169,7 +1169,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
     /// @todo remove those
     switch (m_spellInfo->Id)
     {
-        case 46584: // Raise Dead
+        /*case 46584: // Raise Dead
         {
             if (Player* playerCaster = m_caster->ToPlayer())
             {
@@ -1197,7 +1197,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 }
             }
             return; // don't add targets to target map
-        }
+        }*/
         // Corpse Explosion
         case 49158:
         case 51325:
@@ -5108,6 +5108,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!target || !target->IsFriendlyTo(m_caster) || target->getAttackers().empty())
                         return SPELL_FAILED_BAD_TARGETS;
 
+                }
+                else if (m_spellInfo->Id == 46584)          // Raise Dead
+                {
+                    if (m_caster->ToPlayer()->GetPet())
+                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
                 break;
             }
