@@ -6032,9 +6032,13 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     }
     
-    if (m_spellInfo->Id == 16488 || m_spellInfo->Id == 16490 || m_spellInfo->Id == 16491 || m_spellInfo->Id == 29841 || m_spellInfo->Id == 29842)
+    if (m_spellInfo->Id == 16488 || m_spellInfo->Id == 16490 || m_spellInfo->Id == 16491)
     {
         damage /= 10;
+    }
+    else if (m_spellInfo->Id == 29841 || m_spellInfo->Id == 29842)
+    {
+        damage /= 5;
     }
 
     bool crit = IsPeriodicTickCrit(target, caster);
