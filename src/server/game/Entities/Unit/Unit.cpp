@@ -6344,43 +6344,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
-            // Runic Empowerment
-            if (dummySpell->Id == 81229)
-            {
-                if(procSpell->Id == 49143 || procSpell->Id == 56815 || procSpell->Id == 47632)
-                {
-                    uint8 i = urand(0,MAX_RUNES-1);
-                    bool hasRunes = false;
-                    bool found = false;
-                    // Check runes CD
-                    for(int j = 0; j < MAX_RUNES; j++)
-                    {
-                        if(ToPlayer()->GetRuneCooldown(j) == 0)
-                            continue;
-
-                        hasRunes = true;
-                        break;
-                    }
-
-                    // There is not runes to remove cooldown
-                    if(!hasRunes)
-                        return false;
-
-                    while(!found)
-                    {
-                        if(ToPlayer()->GetRuneCooldown(i) > 0)
-                        {
-                            CastSpell(this, 46916, true);
-                            found = true;
-                            ToPlayer()->SetRuneCooldown(i, 0);
-                            // Bug visual, no se muestra el cd nuevo
-                        }
-                        i = urand(0,MAX_RUNES-1);
-                    }
-                    return true;
-                }
-                break;
-            }
             break;
         }
         case SPELLFAMILY_PET:
