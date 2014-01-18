@@ -6372,7 +6372,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         {
                             found = true;
                             ToPlayer()->SetRuneCooldown(i, 0);
-                            // Visual bug, cooldown restored is not shown
+                            // Visual bug, cooldown restored is only shown if spell uses runes (icy touch f.e)
+                            // Cast path of frost without cost, update runes visual CD, then remove the hacky aura
+                            CastSpell(victim, 3714, true);
+                            RemoveAura(3714);
                         }
                         i = urand(0,MAX_RUNES-1);
                     }
