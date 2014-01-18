@@ -43,3 +43,9 @@ INSERT INTO spell_linked_spell VALUES
 DELETE FROM spell_linked_spell WHERE spell_trigger = 49028;
 INSERT INTO spell_linked_spell
 VALUES (49028,81256,0,'DK dancing rune weapon parry');
+
+DELETE FROM spell_proc_event WHERE entry IN (49018,49529,49530);
+INSERT INTO spell_proc_event VALUES
+(49018, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 1.76, 0, 0),
+(49529, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 3.37, 0, 0),
+(49530, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 4.96, 0, 0);
