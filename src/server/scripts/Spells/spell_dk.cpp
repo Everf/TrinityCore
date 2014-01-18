@@ -58,7 +58,7 @@ enum DeathKnightSpells
     SPELL_DK_SCENT_OF_BLOOD                     = 50422,
     SPELL_DK_SCOURGE_STRIKE_TRIGGERED           = 70890,
     SPELL_DK_UNHOLY_PRESENCE                    = 48265,
-    SPELL_DK_WILL_OF_THE_NECROPOLIS             = 96171
+    SPELL_DK_WILL_OF_THE_NECROPOLIS             = 96171,
 };
 
 // 50462 - Anti-Magic Shell (on raid member)
@@ -569,10 +569,11 @@ class spell_dk_death_strike : public SpellScriptLoader
                     // Call CalculateAmount() to constantly fire the AuraEffect's HandleCalcAmount method
                     int32 heal = CalculatePct(enabler->CalculateAmount(GetCaster()), GetSpellInfo()->Effects[EFFECT_0].DamageMultiplier);
 
+                    heal = std::max(heal, int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue())));
+
                     if (AuraEffect const* aurEff = GetCaster()->GetAuraEffectOfRankedSpell(SPELL_DK_IMPROVED_DEATH_STRIKE, EFFECT_2))
                         heal = AddPct(heal, aurEff->GetAmount());
 
-                    heal = std::max(heal, int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue())));
                     GetCaster()->CastCustomSpell(SPELL_DK_DEATH_STRIKE_HEAL, SPELLVALUE_BASE_POINT0, heal, GetCaster(), true);
                 }
 
