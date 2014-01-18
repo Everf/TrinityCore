@@ -529,6 +529,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                     }
                 }
+                // Death and decay dmg bug
+                else if (m_spellInfo->Id == 52212)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06325f);
+                }
                 break;
             }
             case SPELLFAMILY_MAGE:

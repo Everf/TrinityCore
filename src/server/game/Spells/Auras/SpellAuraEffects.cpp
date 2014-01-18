@@ -5781,6 +5781,17 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     // ignore non positive values (can be result apply spellmods to aura damage
     uint32 damage = std::max(GetAmount(), 0);
 
+    // Fix DK diseases dmg
+    switch (GetId())
+    {
+        case 55095:
+        case 55078:
+            damage += uint32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06325f);
+            break;
+        default:
+            break;
+    }
+
     // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
     sScriptMgr->ModifyPeriodicDamageAurasTick(target, caster, damage);
 
