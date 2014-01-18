@@ -35,3 +35,11 @@ INSERT INTO spell_script_names VALUES (845, 'spell_warr_cleave');
 
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_warr_intercept';
 INSERT INTO spell_script_names VALUES (20253, 'spell_warr_intercept');
+
+DELETE FROM spell_linked_spell WHERE spell_trigger = 100;
+INSERT INTO spell_linked_spell VALUES
+(100, 7922, 0, 'Warrior Chargue stun');
+
+DELETE FROM spell_linked_spell WHERE spell_trigger = 49028;
+INSERT INTO spell_linked_spell
+VALUES (49028,81256,0,'DK dancing rune weapon parry');
