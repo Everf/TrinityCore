@@ -685,6 +685,20 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
+            // Blood plague
+            case 55078:
+            {
+                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06325f);
+                m_caster->CastCustomSpell(55078, SPELLVALUE_BASE_POINT0, damage, unitTarget, true);
+                return;
+            }
+            // Frost fever
+            case 55095:
+            {
+                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06325f);
+                m_caster->CastCustomSpell(55095, SPELLVALUE_BASE_POINT0, damage, unitTarget, true);
+                return;
+            }
             // Vanish (not exist)
             case 18461:
             {
@@ -3894,16 +3908,27 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
             {
                 // Get diseases on target of spell
-                if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+                if (m_targets.GetUnitTarget() && m_targets.GetUnitTarget() != unitTarget)
                 {
                     // And spread them on target
                     // Blood Plague
                     if (m_targets.GetUnitTarget()->GetAura(55078))
-                        m_caster->CastSpell(unitTarget, 55078, true);
+                    {
+                        int32 bp = int32((m_targets.GetUnitTarget()->GetAuraEffect(55078, EFFECT_0)->GetAmount() - 33) * 0.5);
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffectOfRankedSpell(91316, EFFECT_0))
+                            AddPct(bp, aurEff->GetAmount());
+
+                        m_caster->CastCustomSpell(55078, SPELLVALUE_BASE_POINT0, bp, unitTarget, true);
+                    }
                     // Frost Fever
                     if (m_targets.GetUnitTarget()->GetAura(55095))
-                        m_caster->CastSpell(unitTarget, 55095, true);
+                    {   
+                        int32 bp = int32((m_targets.GetUnitTarget()->GetAuraEffect(55095, EFFECT_0)->GetAmount() - 27) * 0.5);
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffectOfRankedSpell(91316, EFFECT_0))
+                            AddPct(bp, aurEff->GetAmount());
+
+                        m_caster->CastCustomSpell(55095, SPELLVALUE_BASE_POINT0, bp, unitTarget, true);
+                    }
                 }
             }
             // Festering Strike

@@ -6349,37 +6349,49 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             {
                 if(procSpell->Id == 49143 || procSpell->Id == 56815 || procSpell->Id == 47632)
                 {
-                    uint8 i = urand(0,MAX_RUNES-1);
-                    bool hasRunes = false;
-                    bool found = false;
-                    // Check runes CD
-                    for(int j = 0; j < MAX_RUNES; j++)
+                    // Cant proc if target has runic corruption aura
+                    if(HasAura(51459) || HasAura(51462))
                     {
-                        if(ToPlayer()->GetRuneCooldown(j) == 0)
-                            continue;
-
-                        hasRunes = true;
-                        break;
-                    }
-
-                    // There is not runes to remove cooldown
-                    if(!hasRunes)
+                        AuraEffect const* aurEff = GetAuraEffect(HasAura(51459) ? 51459 : 51462, EFFECT_0);
+                        int32 bp = 0; //Need to be fixed
+                        //int32 bp = aurEff->GetAmount();
+                        CastCustomSpell(51460, SPELLVALUE_BASE_POINT0, bp, this);
                         return false;
-
-                    while(!found)
-                    {
-                        if(ToPlayer()->GetRuneCooldown(i) > 0)
-                        {
-                            found = true;
-                            ToPlayer()->SetRuneCooldown(i, 0);
-                            // Visual bug, cooldown restored is only shown if spell uses runes (icy touch f.e)
-                            // Cast path of frost without cost, update runes visual CD, then remove the hacky aura
-                            CastSpell(victim, 3714, true);
-                            RemoveAura(3714);
-                        }
-                        i = urand(0,MAX_RUNES-1);
                     }
-                    return true;
+                    else
+                    {
+                        uint8 i = urand(0,MAX_RUNES-1);
+                        bool hasRunes = false;
+                        bool found = false;
+                        // Check runes CD
+                        for(int j = 0; j < MAX_RUNES; j++)
+                        {
+                            if(ToPlayer()->GetRuneCooldown(j) == 0)
+                                continue;
+
+                            hasRunes = true;
+                            break;
+                        }
+
+                        // There is not runes to remove cooldown
+                        if(!hasRunes)
+                            return false;
+
+                        while(!found)
+                        {
+                            if(ToPlayer()->GetRuneCooldown(i) > 0)
+                            {
+                                found = true;
+                                ToPlayer()->SetRuneCooldown(i, 0);
+                                // Visual bug, cooldown restored is only shown if spell uses runes (icy touch f.e)
+                                // Cast path of frost without cost, update runes visual CD, then remove the hacky aura
+                                CastSpell(victim, 3714, true);
+                                RemoveAura(3714);
+                            }
+                            i = urand(0,MAX_RUNES-1);
+                        }
+                        return true;
+                    }
                 }
                 break;
             }
@@ -6618,7 +6630,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                 }
                 return false;
             }
-
             switch (dummySpell->Id)
             {
                 // Bone Shield cooldown
@@ -6910,6 +6921,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     for (uint8 i = 0; i < MAX_RUNES; ++i)
                         if (ToPlayer()->GetRuneCooldown(i) == 0)
                             return false;
+
+                    break;
                 }
                 break;
             }
