@@ -5424,6 +5424,27 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 
                  // timer expired - remove death runes
                 target->ToPlayer()->RemoveRunesByAuraEffect(this);
+                break;
+            }
+            // Death's advance
+            if (GetSpellInfo()->Id == 96268)
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                for (uint8 i = 0; i < MAX_RUNES; ++i)
+                {
+                    if (caster->ToPlayer()->GetRuneCooldown(i) == 0 && caster->ToPlayer()->GetCurrentRune(i) == RUNE_UNHOLY)
+                    {
+                        caster->RemoveAura(96268);
+                        return;
+                    }
+                }
+                if(caster->HasAura(96269) || caster->HasAura(96270)
+                {
+                    int32 amount = caster->HasAura(96269) ? caster->GetAura(96269)->GetEffect(EFFECT_0)->GetAmount() : caster->GetAura(96270)->GetEffect(EFFECT_0)->GetAmount();
+                    caster->CastCustomSpell(GetSpellInfo()->Id, SPELLVALUE_BASE_POINT0, amount, caster, true);
+                }
             }
             break;
         default:

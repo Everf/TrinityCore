@@ -1237,6 +1237,39 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
         }
 };
 
+class spell_dk_deaths_advance : public SpellScriptLoader
+{
+    public:
+        spell_dk_deaths_advance() : SpellScriptLoader("spell_dk_deaths_advance") { }
+
+        class spell_dk_deaths_advance_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_deaths_advance_AuraScript);
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (Player* player = GetTarget()->ToPlayer())
+                {
+                    for (uint8 i = 0; i < MAX_RUNES; ++i)
+                        if (player->GetRuneCooldown(i) == 0 && player->GetCurrentRune(i) == RUNE_UNHOLY)
+                            return false;
+                }
+
+                return true;
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_dk_deaths_advance_AuraScript::CheckProc);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_dk_deaths_advance_AuraScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1263,4 +1296,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_scourge_strike();
     new spell_dk_vampiric_blood();
     new spell_dk_will_of_the_necropolis();
+    new spell_dk_deaths_advance();
 }
