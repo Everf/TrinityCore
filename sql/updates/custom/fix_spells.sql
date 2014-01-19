@@ -49,3 +49,8 @@ INSERT INTO spell_proc_event VALUES
 (49018, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 1.76, 0, 0),
 (49529, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 3.37, 0, 0),
 (49530, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 4.96, 0, 0);
+
+DELETE FROM spell_script_names WHERE spell_id IN(96269,96270); 
+INSERT INTO spell_script_names VALUES 
+(96269,'spell_dk_deaths_advance'),
+(96270,'spell_dk_deaths_advance');
