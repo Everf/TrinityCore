@@ -4721,6 +4721,33 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     // Summon Gargoyle (Dismiss Gargoyle at remove)
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
+                    // Resilient infection
+                    // No salta con fiebre de escarcha porque?
+                    if (GetId() == 55078 || GetId() == 55095)
+                    {
+                        if(aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                        {
+                            if(!caster->HasAura(81338) && !caster->HasAura(81339))
+                                break;
+
+                            RuneType rune = GetId() == 55078 ? RUNE_UNHOLY : RUNE_FROST;
+
+                            for(int8 i = 0; i < MAX_RUNES; i++)
+                            {
+                                if(caster->ToPlayer()->GetRuneCooldown(i) != 0 && caster->ToPlayer()->GetCurrentRune(i) == rune)
+                                {
+                                    caster->ToPlayer()->SetRuneCooldown(i,0);
+                                    // Visual dummy spell
+                                    caster->CastSpell(caster,90721, true);
+                                    // Visual bug, cooldown restored is only shown if spell uses runes (icy touch f.e)
+                                    // Cast path of frost without cost, update runes visual CD, then remove the hacky aura
+                                    caster->CastSpell(caster, 3714, true);
+                                    caster->RemoveAura(3714);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -6052,13 +6079,20 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     }
-    
     if (m_spellInfo->Id == 16488 || m_spellInfo->Id == 16490 || m_spellInfo->Id == 16491)
     {
+        if(caster->HasAura(84579))
+            AddPct(damage, 10);
+        else if(caster->HasAura(84580))
+            AddPct(damage, 20);
         damage /= 10;
     }
     else if (m_spellInfo->Id == 29841 || m_spellInfo->Id == 29842)
     {
+        if(caster->HasAura(84579))
+            AddPct(damage, 10);
+        else if(caster->HasAura(84580))
+            AddPct(damage, 20);
         damage /= 5;
     }
 
