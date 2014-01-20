@@ -126,8 +126,6 @@ class instance_naxxramas : public InstanceMapScript
                 KelthuzadGUID           = 0;
                 KelthuzadTriggerGUID    = 0;
 
-                playerDied              = 0;
-
                 memset(PortalsGUID, 0, sizeof(PortalsGUID));
             }
 
@@ -245,15 +243,6 @@ class instance_naxxramas : public InstanceMapScript
                 }
 
                 AddDoor(go, false);
-            }
-
-            void OnUnitDeath(Unit* unit) OVERRIDE
-            {
-                if (unit->GetTypeId() == TYPEID_PLAYER && IsEncounterInProgress())
-                {
-                    playerDied = 1;
-                    SaveToDB();
-                }
             }
 
             void SetData(uint32 id, uint32 value) OVERRIDE
@@ -406,22 +395,6 @@ class instance_naxxramas : public InstanceMapScript
                         if (Difficulty(instance->GetSpawnMode()) == RAID_DIFFICULTY_25MAN_NORMAL && (maxHorsemenDiedTime - minHorsemenDiedTime) < 15)
                             return true;
                         return false;
-                    // Difficulty checks are done on DB.
-                    // Criteria for achievement 2186: The Immortal (25-man)
-                    case 13233: // The Four Horsemen
-                    case 13234: // Maexxna
-                    case 13235: // Thaddius
-                    case 13236: // Loatheb
-                    case 7616:  // Kel'Thuzad
-                    // Criteria for achievement 2187: The Undying (10-man)
-                    case 13237: // The Four Horsemen
-                    case 13238: // Maexxna
-                    case 13239: // Loatheb
-                    case 13240: // Thaddius
-                    case 7617:  // Kel'Thuzad
-                        if (AreAllEncoutersDone() && !playerDied)
-                            return true;
-                        return false;
                 }
 
                 return false;
@@ -432,7 +405,7 @@ class instance_naxxramas : public InstanceMapScript
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "N X " << GetBossSaveData() << playerDied;
+                saveStream << "N X " << GetBossSaveData();
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -464,8 +437,6 @@ class instance_naxxramas : public InstanceMapScript
 
                         SetBossState(i, EncounterState(tmpState));
                     }
-
-                    loadStream >> playerDied;
                 }
 
                 OUT_LOAD_INST_DATA_COMPLETE;
@@ -508,9 +479,6 @@ class instance_naxxramas : public InstanceMapScript
             uint64 KelthuzadTriggerGUID;
             uint64 PortalsGUID[4];
             uint8 AbominationCount;
-
-            /* The Immortal / The Undying */
-            uint32 playerDied;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
