@@ -69,9 +69,9 @@ enum WarriorSpells
     SPELL_WARRIOR_BLOODSURGE_2                      = 46914,
     SPELL_WARRIOR_BLOODSURGE_3                      = 46915,
     SPELL_WARRIOR_BLOODSURGE_TRIGGERED              = 46916,
-    SPELL_WARRIOR_BATTLE_TRANCE_1                   = 85741,
-    SPELL_WARRIOR_BATTLE_TRANCE_2                   = 85742,
-    SPELL_WARRIOR_BATTLE_TRANCE_3                   = 12322,
+    SPELL_WARRIOR_BATTLE_TRANCE_1                   = 12322,
+    SPELL_WARRIOR_BATTLE_TRANCE_2                   = 85741,
+    SPELL_WARRIOR_BATTLE_TRANCE_3                   = 85742,
     SPELL_WARRIOR_BATTLE_TRANCE_TRIGGERED           = 12964,
     SPELL_WARRIOR_INTERCEPT                         = 20252,
     SPELL_WARRIOR_INTERCEPT_COOLDOWN                = 96216,
@@ -150,8 +150,16 @@ class spell_warr_bloodthirst_heal : public SpellScriptLoader
 
             void HandleHeal(SpellEffIndex /*effIndex*/)
             {
+                uint32 heal = 0;
                 if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
-                    SetHitHeal(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 1000);
+                    heal = (GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())) / 1000);
+
+                if (GetCaster()->HasAura(84579))
+                    AddPct(heal, 13);
+                else if (GetCaster()->HasAura(84580))
+                    AddPct(heal, 26);
+
+                SetHitHeal(heal);
             }
 
             void Register() OVERRIDE
