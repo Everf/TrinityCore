@@ -4232,7 +4232,7 @@ void AuraEffect::HandleAuraModAttackPower(AuraApplication const* aurApp, uint8 m
 
     Unit* target = aurApp->GetTarget();
 
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(GetAmount()), apply);
+    target->HandleStatModifier((GetAmount() > 0) ? UNIT_MOD_ATTACK_POWER_POS : UNIT_MOD_ATTACK_POWER_NEG, TOTAL_VALUE, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4245,7 +4245,7 @@ void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const* aurApp, u
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
 
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(GetAmount()), apply);
+    target->HandleStatModifier((GetAmount() > 0) ? UNIT_MOD_ATTACK_POWER_RANGED_POS : UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4256,7 +4256,7 @@ void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, 
     Unit* target = aurApp->GetTarget();
 
     //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, float(GetAmount()), apply);
+    target->HandleStatModifier((GetAmount() > 0) ? UNIT_MOD_ATTACK_POWER_POS : UNIT_MOD_ATTACK_POWER_NEG, TOTAL_PCT, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4270,7 +4270,7 @@ void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* au
         return;
 
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(GetAmount()), apply);
+    target->HandleStatModifier((GetAmount() > 0) ? UNIT_MOD_ATTACK_POWER_RANGED_POS : UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_PCT, float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
@@ -4628,6 +4628,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
                         break;
+                // Vengeance
+                case 93098:
+                    if (caster)
+                        //caster->CastSpell(caster, 76691, true);
+                    break;
             }
         }
         // AT REMOVE
@@ -4725,7 +4730,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     // No salta con fiebre de escarcha porque?
                     if (GetId() == 55078 || GetId() == 55095)
                     {
-                        if(aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                        if(aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
                         {
                             if(!caster->HasAura(81338) && !caster->HasAura(81339))
                                 break;
@@ -5315,6 +5320,10 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                         target->RemoveAura(64821);
                     }
+                    break;
+                case 76691: // Vengeance
+                    if(!target->IsInCombat())
+                        target->RemoveAura(76691);
                     break;
             }
             break;
