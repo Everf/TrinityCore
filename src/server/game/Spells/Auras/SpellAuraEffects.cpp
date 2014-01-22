@@ -4628,11 +4628,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
                         break;
-                // Vengeance
-                case 93098:
-                    if (caster)
-                        //caster->CastSpell(caster, 76691, true);
-                    break;
             }
         }
         // AT REMOVE
@@ -5320,10 +5315,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                         target->RemoveAura(64821);
                     }
-                    break;
-                case 76691: // Vengeance
-                    if(!target->IsInCombat())
-                        target->RemoveAura(76691);
                     break;
             }
             break;
