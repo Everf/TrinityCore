@@ -721,6 +721,46 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
         victim->ModifyHealth(-(int32)damage);
 
+        SpellFamilyNames family = SPELLFAMILY_GENERIC;
+        // Vengeance proc
+        switch(victim->getClass())
+        {
+            case CLASS_WARRIOR:     family = SPELLFAMILY_WARRIOR;       break;
+            case CLASS_PALADIN:     family = SPELLFAMILY_PALADIN;       break;
+            case CLASS_DRUID:       family = SPELLFAMILY_DRUID;         break;
+            // Dk's Vengeance has spellfamily warrior flag, don't know why
+            case CLASS_DEATH_KNIGHT:family = SPELLFAMILY_WARRIOR;   break;
+            default: break;
+        }
+        if (AuraEffect *aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, family, 3031, 0))
+        {
+            if(this != victim && this->GetTypeId() != TYPEID_PLAYER)
+            {
+                // Tooltip says 5% of damage but wowpedia says:
+                // Patch 4.3.0 (2011-11-29): Vengeance has been redesigned slightly.
+                // It no longer ramps up slowly at the beginning of a fight.
+                // Instead, the first melee attack taken by the tank generates Vengeance equal to 33% of the damage taken by that attack.
+                // In addition, as it updates periodically during the fight, it's always set to at least 33% of the damage taken by the tank in the last 2 seconds.
+                // int32 value = ApplyPct(damage, aurEff->GetAmount());
+                int32 value = ApplyPct(damage, 33);
+                if(value < 1)
+                    value = 1;
+
+                if(uint32(value) > victim->CountPctFromMaxHealth(aurEff->GetAmount()*2))
+                    value = victim->CountPctFromMaxHealth(aurEff->GetAmount()*2);
+
+                if(victim->HasAura(76691))
+                {
+                    value += victim->GetAuraEffect(76691, EFFECT_0)->GetAmount();
+
+                    if(uint32(value) > victim->CountPctFromMaxHealth(aurEff->GetAmount()*2))
+                        value = victim->CountPctFromMaxHealth(aurEff->GetAmount()*2);
+                }
+
+                victim->CastCustomSpell(victim, 76691, &value, &value, NULL, true);
+            }
+        }
+
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
         {
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
