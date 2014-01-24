@@ -22,6 +22,12 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 (80979, 0, 4, 0x8000, 0, 0, 0, 0, 0, 0, 0),
 (80980, 0, 4, 0x8000, 0, 0, 0, 0, 0, 0, 0);
 
+DELETE FROM spell_proc_event WHERE  entry IN (16487,16489,16492);
+INSERT INTO spell_proc_event VALUES
+(16487, 0, 0, 0, 0, 0, 0x00100000, 0x03, 0, 0, 0),
+(16489, 0, 0, 0, 0, 0, 0x00100000, 0x03, 0, 0, 0),
+(16492, 0, 0, 0, 0, 0, 0x00100000, 0x03, 0, 0, 0);
+
 DELETE FROM spell_script_names WHERE spell_id IN (23881, 12294, 23922);
 INSERT INTO spell_script_names VALUES
 (23881, 'spell_warr_battle_trance'),
