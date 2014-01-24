@@ -5316,20 +5316,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->RemoveAura(64821);
                     }
                     break;
-                case 76691: // Vengeance
-                    if(!target->IsInCombat())
-                    {
-                        // Remove partially while not in combat, values should be wrong
-                        int32 value = target->GetAuraEffect(76691, EFFECT_0)->GetAmount();
-                        value = ApplyPct(value, 75);
-                        if(uint32(value) < target->CountPctFromMaxHealth(1))
-                            target->RemoveAura(76691);
-                        else
-                            target->CastCustomSpell(target, 76691, &value, &value, NULL, true);
-                    }
-                    if(target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() == FORM_CAT)
-                          target->RemoveAura(76691);
-                    break;
             }
             break;
         case SPELLFAMILY_MAGE:
