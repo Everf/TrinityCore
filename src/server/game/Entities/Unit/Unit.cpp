@@ -5644,6 +5644,49 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         basepoints0 = int32(CalculatePct(damage, triggerAmount) / (blessHealing->GetMaxDuration() / blessHealing->Effects[0].Amplitude));
                     }
                     break;
+                // Train of Thought
+                case 92295:
+                case 92297:
+                    // Smite
+                    Player* player = triggeredByAura->GetCaster()->ToPlayer();
+                    if (procSpell->Id == 585)
+                    {
+                        if (player && player->HasSpellCooldown(47540))
+                        {
+                            float newCooldownDelay = player->GetSpellCooldownDelay(47540);
+                            if (newCooldownDelay <= 0.5)
+                                 newCooldownDelay = 0;
+                             else
+                                 newCooldownDelay -= 0.5;
+
+                             player->AddSpellCooldown(47540, 0, uint32(time(NULL) + newCooldownDelay));
+                             WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                             data << uint32(47540);
+                             data << uint64(player->GetGUID());
+                             data << int32(-500);
+                             player->GetSession()->SendPacket(&data);
+                        }
+                    }
+                    // Greater heal
+                    else if (procSpell->Id == 2060)
+                    {
+                        if (player && player->HasSpellCooldown(89485))
+                        {
+                            float newCooldownDelay = player->GetSpellCooldownDelay(89485);
+                            if (newCooldownDelay <= 5)
+                                 newCooldownDelay = 0;
+                             else
+                                 newCooldownDelay -= 5;
+
+                             player->AddSpellCooldown(89485, 0, uint32(time(NULL) + newCooldownDelay));
+                             WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                             data << uint32(89485);
+                             data << uint64(player->GetGUID());
+                             data << int32(-5000);
+                             player->GetSession()->SendPacket(&data);
+                        }
+                    }
+                    break;
             }
             break;
         }
@@ -7002,6 +7045,45 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        // Battle trance
+        case 12322:
+        case 85741:
+        case 85742:
+            if(procSpell->Id != 23881 && procSpell->Id != 23922 && procSpell->Id != 12294)
+                return false;
+            break;
+        // Executioner
+        case 20502:
+        case 20503:
+            if(procSpell->Id != 5308)
+                return false;
+            break;
+        // Bloodsurge
+        case 46913:
+        case 46914:
+        case 46915:
+            if(procSpell->Id != 23881)
+                return false;
+            break;
+        // Incite
+        case 50685:
+        case 50686:
+        case 50687:
+            if(procSpell->Id != 78)
+                return false;
+            break;
+        // Thunderstruck
+        case 80979:
+        case 80980:
+            if(procSpell->Id != 6343)
+                return false;
+            break;
+        // Strenght of Soul
+        case 89488:
+        case 89489:
+            if(procSpell->Id != 2050 && procSpell->Id != 2061 && procSpell->Id != 2060)
+                return false;
+            break;
         // Deep Wounds
         case 12834:
         case 12849:

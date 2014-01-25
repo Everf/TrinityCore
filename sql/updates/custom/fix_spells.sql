@@ -60,3 +60,11 @@ DELETE FROM spell_script_names WHERE spell_id IN(96269,96270);
 INSERT INTO spell_script_names VALUES 
 (96269,'spell_dk_deaths_advance'),
 (96270,'spell_dk_deaths_advance');
+
+
+-- Inner focus remove aura
+DELETE FROM spell_linked_spell WHERE spell_trigger IN (2060, 596,2061,32546);
+INSERT INTO spell_linked_spell VALUES (2060, -89485, 0, 'Remove Inner focus');
+INSERT INTO spell_linked_spell VALUES (596, -89485, 0, 'Remove Inner focus');
+INSERT INTO spell_linked_spell VALUES (2061, -89485, 0, 'Remove Inner focus');
+INSERT INTO spell_linked_spell VALUES (32546, -89485, 0, 'Remove Inner focus');

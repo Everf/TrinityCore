@@ -3922,6 +3922,33 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            if(m_spellInfo->Id == 89490) // Strenght of Soul
+            {
+                if(m_caster->HasAura(89488)) // Strenght of Soul rank 1
+                {
+                    if(Aura* aur = unitTarget->GetAura(6788))
+                    {
+                        if(aur->GetDuration() >= 3000)
+                            aur->SetDuration(aur->GetDuration() - 2000,true);
+                        else
+                            unitTarget->RemoveAurasDueToSpell(6788);
+                    }
+                }
+                else if(m_caster->HasAura(89489)) // Strenght of Soul rank 2
+                {
+                    if(Aura* aur = unitTarget->GetAura(6788))
+                    {
+                        if(aur->GetDuration() >= 5000)
+                            aur->SetDuration(aur->GetDuration() - 4000,true);
+                        else
+                            unitTarget->RemoveAurasDueToSpell(6788);
+                    }
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Pestilence
