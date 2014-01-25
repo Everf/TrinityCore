@@ -564,10 +564,11 @@ class spell_dk_death_strike : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+                int32 heal = 0;
                 if (AuraEffect* enabler = GetCaster()->GetAuraEffect(SPELL_DK_DEATH_STRIKE_ENABLER, EFFECT_0, GetCaster()->GetGUID()))
                 {
                     // Call CalculateAmount() to constantly fire the AuraEffect's HandleCalcAmount method
-                    int32 heal = CalculatePct(enabler->CalculateAmount(GetCaster()), GetSpellInfo()->Effects[EFFECT_0].DamageMultiplier);
+                    heal = CalculatePct(enabler->CalculateAmount(GetCaster()), GetSpellInfo()->Effects[EFFECT_0].DamageMultiplier);
 
                     heal = std::max(heal, int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue())));
 
@@ -581,7 +582,7 @@ class spell_dk_death_strike : public SpellScriptLoader
                     return;
 
                 if (AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_DK_BLOOD_SHIELD_MASTERY, EFFECT_0))
-                    GetCaster()->CastCustomSpell(SPELL_DK_BLOOD_SHIELD_ABSORB, SPELLVALUE_BASE_POINT0, GetCaster()->CountPctFromMaxHealth(aurEff->GetAmount()), GetCaster());
+                    GetCaster()->CastCustomSpell(SPELL_DK_BLOOD_SHIELD_ABSORB, SPELLVALUE_BASE_POINT0, (ApplyPct(heal, aurEff->GetAmount())), GetCaster());
             }
 
             void Register() OVERRIDE
