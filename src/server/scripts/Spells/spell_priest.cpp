@@ -60,7 +60,19 @@ enum PriestSpells
     SPELL_PRIEST_TWIN_DISCIPLINES_RANK_1            = 47586,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
     SPELL_PRIEST_VAMPIRIC_EMBRACE_HEAL              = 15290,
-    SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085
+    SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 64085,
+    SPELL_PRIEST_EVANGELISM_RANK_1                  = 81659,
+    SPELL_PRIEST_EVANGELISM_RANK_2                  = 81662,
+    SPELL_PRIEST_EVANGELISM_VISUAL_AURA             = 87154,
+    SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_1        = 81660,
+    SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2        = 81661, 
+    SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_1   = 87117,
+    SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2   = 87118,
+    SPELL_PRIEST_ARCHANGEL                          = 87152,
+    SPELL_PRIEST_ARCHANGEL_VISUAL_AURA              = 94709,
+    SPELL_PRIEST_ARCHANGEL_MANA                     = 87152,
+    SPELL_PRIEST_ARCHANGEL_TRIGGERED                = 81700,
+    SPELL_PRIEST_DARK_ARCHANGEL_TRIGGERED           = 87153,
 };
 
 enum PriestSpellIcons
@@ -1074,6 +1086,117 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
         }
 };
 
+class spell_pri_evangelism : public SpellScriptLoader
+{
+    public:
+        spell_pri_evangelism() : SpellScriptLoader("spell_pri_evangelism") { }
+
+        class spell_pri_evangelism_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_evangelism_AuraScript);
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                return (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 585 ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 14914 ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 15407);
+            }
+
+            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetCaster()->CastCustomSpell(SPELL_PRIEST_ARCHANGEL_VISUAL_AURA, SPELLVALUE_BASE_POINT0, 0, GetCaster(), TRIGGERED_CAST_DIRECTLY);
+                GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_EVANGELISM_VISUAL_AURA, true);
+                if(GetCaster()->GetShapeshiftForm() == FORM_SHADOW)
+                {
+                    if(GetCaster()->HasAura(SPELL_PRIEST_EVANGELISM_RANK_1))
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_1);
+                        GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_1, true);
+                    }
+                    else if (GetCaster()->HasAura(SPELL_PRIEST_EVANGELISM_RANK_2))
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2);
+                        GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2, true);
+                    }
+                }
+                else
+                {
+                    if(GetCaster()->HasAura(SPELL_PRIEST_EVANGELISM_RANK_1))
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_1);
+                        GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_1, true);
+                    }
+                    else if (GetCaster()->HasAura(SPELL_PRIEST_EVANGELISM_RANK_2))
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2);
+                        GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2, true);
+                    }
+                }
+                // Aura without duration, should be 20 seconds
+                if(Aura *pAura = GetCaster()->GetAura(SPELL_PRIEST_ARCHANGEL_VISUAL_AURA))
+                    pAura->SetDuration(20000);
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_pri_evangelism_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_pri_evangelism_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_evangelism_AuraScript();
+        }
+};
+
+class spell_pri_archangel : public SpellScriptLoader
+{
+    public:
+        spell_pri_archangel() : SpellScriptLoader("spell_pri_archangel") { }
+
+        class spell_pri_archangel_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_archangel_SpellScript);
+
+            void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
+            {
+                Aura *pAura = NULL;
+                uint32 stacks = 0;
+                if (pAura = GetCaster()->GetAura(SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2))
+                {
+                    stacks = pAura->GetStackAmount();
+                    int32 bp = 3 * stacks;
+                    GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_MANA, true);
+                    GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_TRIGGERED, &bp, NULL, NULL, true);
+                    GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2);
+                }
+                else if (pAura = GetCaster()->GetAura(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2))
+                {
+                    stacks = pAura->GetStackAmount();
+                    int32 bp = 4 * stacks;
+                    int32 bp1 = 5;
+                    GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_DARK_ARCHANGEL_TRIGGERED, &bp, &bp, NULL, true);
+                    GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_MANA, &bp1, NULL, NULL, true);
+                    GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2);
+                }
+                GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_ARCHANGEL_VISUAL_AURA);
+                GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_EVANGELISM_VISUAL_AURA);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_archangel_SpellScript::HandleEffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_archangel_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
@@ -1099,4 +1222,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_vampiric_embrace();
     new spell_pri_vampiric_embrace_target();
     new spell_pri_vampiric_touch();
+    new spell_pri_evangelism();
+    new spell_pri_archangel();
 }
