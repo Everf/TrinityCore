@@ -73,6 +73,10 @@ enum PriestSpells
     SPELL_PRIEST_ARCHANGEL_MANA                     = 87152,
     SPELL_PRIEST_ARCHANGEL_TRIGGERED                = 81700,
     SPELL_PRIEST_DARK_ARCHANGEL_TRIGGERED           = 87153,
+    SPELL_PRIEST_ATONEMENT_HEAL                     = 81751,
+    SPELL_PRIEST_SMITE                              = 585,
+    SPELL_PRIEST_HOLY_FIRE                          = 14914,
+    SPELL_PRIEST_MIND_FLAY                          = 15407,
 };
 
 enum PriestSpellIcons
@@ -85,6 +89,23 @@ enum PriestSpellIcons
 enum MiscSpells
 {
     SPELL_GEN_REPLENISHMENT                         = 57669
+};
+
+class RaidCheck
+{
+    public:
+        explicit RaidCheck(Unit const* caster) : _caster(caster) { }
+
+        bool operator()(WorldObject* obj) const
+        {
+            if (Unit* target = obj->ToUnit())
+            return !_caster->IsInRaidWith(target);
+
+            return true;
+        }
+
+    private:
+        Unit const* _caster;
 };
 
 class spell_pri_body_and_soul : public SpellScriptLoader
@@ -1097,9 +1118,9 @@ class spell_pri_evangelism : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 585 ||
-                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 14914 ||
-                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 15407);
+                return (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_SMITE ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_HOLY_FIRE ||
+                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_MIND_FLAY);
             }
 
             void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
@@ -1197,6 +1218,79 @@ class spell_pri_archangel : public SpellScriptLoader
         }
 };
 
+class spell_pri_atonement : public SpellScriptLoader
+{
+    public:
+        spell_pri_atonement() : SpellScriptLoader("spell_pri_atonement") { }
+
+        class spell_pri_atonement_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_atonement_AuraScript);
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                return (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_SMITE ||
+                    (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_HOLY_FIRE));
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                int32 bp = eventInfo.GetDamageInfo()->GetDamage();
+                GetCaster()->CastCustomSpell(NULL, SPELL_PRIEST_ATONEMENT_HEAL, &bp, NULL, NULL, true);
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_pri_atonement_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_pri_atonement_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);           
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_atonement_AuraScript();
+        }
+};
+
+class spell_pri_atonement_heal : public SpellScriptLoader
+{
+    public:
+        spell_pri_atonement_heal() : SpellScriptLoader("spell_pri_atonement_heal") { }
+
+        class spell_pri_atonement_heal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_atonement_heal_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                // TODO: Should target low HP raid member in range
+                targets.remove_if(RaidCheck(GetCaster()));
+                targets.resize(1);
+            }
+
+            void HandleHeal(SpellEffIndex /*effIndex*/)
+            {
+                int32 heal = GetEffectValue();
+                if(GetCaster() == GetHitUnit())
+                    heal *= 0.5f;
+
+                SetHitHeal(heal);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_atonement_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_atonement_heal_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY); 
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_atonement_heal_SpellScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
@@ -1224,4 +1318,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_vampiric_touch();
     new spell_pri_evangelism();
     new spell_pri_archangel();
+    new spell_pri_atonement();
+    new spell_pri_atonement_heal();
 }

@@ -56,13 +56,16 @@ INSERT INTO spell_proc_event VALUES
 (49529, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 3.37, 0, 0),
 (49530, 0, 0, 0, 0, 0, 0x00000004, 0x0000003, 4.96, 0, 0);
 
-DELETE FROM spell_script_names WHERE spell_id IN(96269,96270,87151,81659,81662); 
+DELETE FROM spell_script_names WHERE spell_id IN(96269,96270,87151,81659,81662,14523,81749,81751); 
 INSERT INTO spell_script_names VALUES 
 (96269, 'spell_dk_deaths_advance'),
 (96270, 'spell_dk_deaths_advance'),
 (87151, 'spell_pri_archangel'),
 (81659, 'spell_pri_evangelism'),
-(81662, 'spell_pri_evangelism');
+(81662, 'spell_pri_evangelism'),
+(14523, 'spell_pri_atonement'),
+(81749, 'spell_pri_atonement'),
+(81751, 'spell_pri_atonement_heal');
 
 
 -- Inner focus remove aura
@@ -71,3 +74,7 @@ INSERT INTO spell_linked_spell VALUES (2060, -89485, 0, 'Remove Inner focus');
 INSERT INTO spell_linked_spell VALUES (596, -89485, 0, 'Remove Inner focus');
 INSERT INTO spell_linked_spell VALUES (2061, -89485, 0, 'Remove Inner focus');
 INSERT INTO spell_linked_spell VALUES (32546, -89485, 0, 'Remove Inner focus');
+
+DELETE FROM spell_linked_spell WHERE spell_effect = -88688;
+INSERT INTO spell_linked_spell VALUES
+(101062, -88688, 0, 'Remove Surge of Light');
