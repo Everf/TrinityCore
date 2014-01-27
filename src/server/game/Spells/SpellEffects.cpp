@@ -439,12 +439,16 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 // Mind spike
                 if(m_spellInfo->Id == 73510)
                 {
+                    // Mind spike should remove shadow dots
                     Unit::AuraEffectList auraList = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for (Unit::AuraEffectList::const_iterator i = auraList.begin(); i != auraList.end(); ++i)
                     {
                         if(((*i)->GetSpellInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_SHADOW) != 0 && (*i)->GetCaster() == m_caster) 
                             unitTarget->RemoveAura((*i)->GetId());
                     }
+                    // Devouring plague has "Periodically Drain Health" spell aura
+                    if(unitTarget->HasAura(2944))
+                        unitTarget->RemoveAura(2944);
                 }
                 break;
             }
