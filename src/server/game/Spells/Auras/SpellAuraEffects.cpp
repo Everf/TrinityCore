@@ -5340,6 +5340,13 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 target->CastSpell((Unit*)NULL, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Holy word: sanctuary
+            if(GetId() == 88685)
+                caster->CastSpell(caster, 88686, true);
+            break;
+        }
         case SPELLFAMILY_DRUID:
         {
             switch (GetSpellInfo()->Id)

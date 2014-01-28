@@ -56,6 +56,7 @@ enum PriestSpells
     SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED        = 33619,
     SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH    = 107903,
     SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH       = 107904,
+    SPELL_PRIEST_SHADOW_WORD_PAIN                   = 589,
     SPELL_PRIEST_SHADOW_WORD_DEATH                  = 32409,
     SPELL_PRIEST_TWIN_DISCIPLINES_RANK_1            = 47586,
     SPELL_PRIEST_T9_HEALING_2P                      = 67201,
@@ -77,6 +78,34 @@ enum PriestSpells
     SPELL_PRIEST_SMITE                              = 585,
     SPELL_PRIEST_HOLY_FIRE                          = 14914,
     SPELL_PRIEST_MIND_FLAY                          = 15407,
+    SPELL_PRIEST_MIND_SPIKE                         = 73510,
+    SPELL_PRIEST_MIND_SPIKE_AURA                    = 87178,
+    SPELL_PRIEST_MIND_BLAST                         = 8092,
+    SPELL_PRIEST_MIND_MELT_RANK_1                   = 14910,
+    SPELL_PRIEST_MIND_MELT_RANK_2                   = 33371,
+    SPELL_PRIEST_HEAL                               = 2050,
+    SPELL_PRIEST_BINDING_HEAL                       = 32546,
+    SPELL_PRIEST_FLASH_HEAL                         = 2061,
+    SPELL_PRIEST_GREATER_HEAL                       = 2060,
+    SPELL_PRIEST_PRAYER_OF_HEALING                  = 596,
+    SPELL_PRIEST_PRAYER_OF_MENDING                  = 33076,
+    SPELL_PRIEST_CHAKRA                             = 14751,
+    SPELL_PRIEST_CHAKRA_SERENITY                    = 81208,
+    SPELL_PRIEST_CHAKRA_SERENITY_AURA               = 81585,
+    SPELL_PRIEST_CHAKRA_SANCTUARY                   = 81206,
+    SPELL_PRIEST_CHAKRA_SANCTUARY_AURA              = 81207,
+    SPELL_PRIEST_CHAKRA_CHASTISE                    = 81209,
+    SPELL_PRIEST_REVELATIONS                        = 88627,
+    SPELL_PRIEST_HOLY_WORD_SANCTUARY_HEAL           = 88686,
+    SPELL_PRIEST_RENEW                              = 139,
+    SPELL_PRIEST_ECHO_OF_LIGHT_MASTERY              = 77485,
+    SPELL_PRIEST_ECHO_OF_LIGHT_HEAL                 = 77489,
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_1          = 87099,
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_2          = 87100,
+    SPELL_PRIEST_SIN_AND_PUNISHMENT_FEAR            = 87204,
+    SPELL_PRIEST_SHADOWFIEND                        = 34433,
+    SPELL_PRIEST_SHADOW_ORB_MASTERY                 = 77486,
+    SPELL_PRIEST_SHADOW_ORB                         = 77487,
 };
 
 enum PriestSpellIcons
@@ -758,15 +787,6 @@ class spell_pri_power_word_shield : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_power_word_shield_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_R1))
-                    return false;
-                return true;
-            }
-
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
             {
                 canBeRecalculated = false;
@@ -921,11 +941,23 @@ class spell_pri_shadow_word_death : public SpellScriptLoader
             {
                 int32 damage = GetHitDamage();
 
+                // Damage x 3 if target has <25% hp
+                if(GetHitUnit()->HealthBelowPct(25))
+                {
+                    damage *= 3;
+                    if (Aura* aura = GetCaster()->GetAura(SPELL_PRIEST_MIND_MELT_RANK_1))
+                        AddPct(damage,aura->GetEffect(EFFECT_0)->GetAmount());
+                    else if (Aura* aura = GetCaster()->GetAura(SPELL_PRIEST_MIND_MELT_RANK_2))
+                        AddPct(damage,aura->GetEffect(EFFECT_0)->GetAmount());
+                }
+                SetHitDamage(damage);
+
+                int32 selfDamage = damage;
                 // Pain and Suffering reduces damage
                 if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_PAIN_AND_SUFFERING, EFFECT_1))
-                    AddPct(damage, aurEff->GetAmount());
+                    AddPct(selfDamage, aurEff->GetAmount());
 
-                GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &selfDamage, 0, 0, true);
             }
 
             void Register() OVERRIDE
@@ -1076,7 +1108,10 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                     if (Unit* target = GetUnitOwner())
                         if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
-                        {
+                        {                            
+                            if(caster->HasAura(SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_2) || (caster->HasAura(SPELL_PRIEST_SIN_AND_PUNISHMENT_RANK_1) && roll_chance_i(50)))
+                                target->CastSpell(target, SPELL_PRIEST_SIN_AND_PUNISHMENT_FEAR, true);
+
                             int32 damage = aurEff->GetAmount() * 8;
                             // backfire damage
                             caster->CastCustomSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
@@ -1233,7 +1268,7 @@ class spell_pri_atonement : public SpellScriptLoader
                     (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_HOLY_FIRE));
             }
 
-            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
                 int32 bp = eventInfo.GetDamageInfo()->GetDamage();
@@ -1291,6 +1326,217 @@ class spell_pri_atonement_heal : public SpellScriptLoader
         }
 };
 
+class spell_pri_chakra : public SpellScriptLoader
+{
+    public:
+        spell_pri_chakra() : SpellScriptLoader("spell_pri_chakra") { }
+
+        class spell_pri_chakra_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_chakra_SpellScript);
+
+            void HandleEffect(SpellEffIndex /*effIndex*/)
+            {
+                if(GetCaster()->HasAura(SPELL_PRIEST_CHAKRA))
+                {
+                    uint32 id = 0;
+                    int32 bp = 0;
+                    switch(GetSpell()->GetSpellInfo()->Id)
+                    {
+                    case SPELL_PRIEST_SMITE:
+                    case SPELL_PRIEST_MIND_SPIKE:
+                        id = SPELL_PRIEST_CHAKRA_CHASTISE;
+                        break;
+                    case SPELL_PRIEST_HEAL:
+                    case SPELL_PRIEST_BINDING_HEAL:
+                    case SPELL_PRIEST_FLASH_HEAL:
+                    case SPELL_PRIEST_GREATER_HEAL:
+                        id = SPELL_PRIEST_CHAKRA_SERENITY;
+                        break;
+                    case SPELL_PRIEST_PRAYER_OF_HEALING:
+                    case SPELL_PRIEST_PRAYER_OF_MENDING:
+                        id = SPELL_PRIEST_CHAKRA_SANCTUARY;
+                        break;
+                    default:
+                        break;
+                    }
+                    if(!GetCaster()->HasAura(SPELL_PRIEST_REVELATIONS))
+                    {
+                        // If caster has not talent, ability holy word should not change
+                        GetCaster()->CastCustomSpell(id, SPELLVALUE_BASE_POINT2, 88625, GetCaster(), true);
+                    }
+                    else
+                        GetCaster()->CastSpell(GetCaster(), id, true);
+
+                    GetCaster()->RemoveAura(SPELL_PRIEST_CHAKRA);
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_chakra_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_ANY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_chakra_SpellScript();
+        }
+};
+
+class spell_pri_chakra_serenity : public SpellScriptLoader
+{
+    public:
+        spell_pri_chakra_serenity() : SpellScriptLoader("spell_pri_chakra_serenity") { }
+
+        class spell_pri_chakra_serenity_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_chakra_serenity_SpellScript);
+
+            void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
+            {
+                if(Aura *pAura = GetHitUnit()->GetAura(SPELL_PRIEST_RENEW, GetCaster()->GetGUID()))
+                {
+                    pAura->RefreshDuration();
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_chakra_serenity_SpellScript::HandleEffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_chakra_serenity_SpellScript();
+        }
+};
+
+class spell_pri_echo_of_light : public SpellScriptLoader
+{
+    public:
+        spell_pri_echo_of_light() : SpellScriptLoader("spell_pri_echo_of_light") { }
+
+        class spell_pri_echo_of_light_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_echo_of_light_AuraScript);
+
+            void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+                int32 bp = eventInfo.GetHealInfo()->GetHeal() / 6;
+                
+                if (AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_MASTERY, EFFECT_0))
+                    ApplyPct(bp, aurEff->GetAmount());
+
+                GetCaster()->CastCustomSpell(eventInfo.GetProcTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_HEAL, &bp, NULL, NULL, true);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_pri_echo_of_light_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_echo_of_light_AuraScript();
+        }
+};
+
+class spell_pri_sin_and_punishment : public SpellScriptLoader
+{
+    public:
+        spell_pri_sin_and_punishment() : SpellScriptLoader("spell_pri_sin_and_punishment") { }
+
+        class spell_pri_sin_and_punishment_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_sin_and_punishment_AuraScript);
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                return (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_MIND_FLAY);
+            }
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                if(Player *player = GetCaster()->ToPlayer())
+                {
+                    if(player->HasSpellCooldown(SPELL_PRIEST_SHADOWFIEND))
+                    {
+                        float cd = player->GetSpellCooldownDelay(SPELL_PRIEST_SHADOWFIEND);
+                        if (cd <= 10)
+                             cd = 0;
+                         else
+                             cd -= 10;
+                        player->AddSpellCooldown(SPELL_PRIEST_SHADOWFIEND, 0, uint32(time(NULL) + cd));
+                        WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                        data << uint32(SPELL_PRIEST_SHADOWFIEND);
+                        data << uint64(player->GetGUID());
+                        data << int32(-10000);
+                        player->GetSession()->SendPacket(&data);
+                    }
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                DoCheckProc += AuraCheckProcFn(spell_pri_sin_and_punishment_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_pri_sin_and_punishment_AuraScript::HandleEffectProc, EFFECT_1, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_pri_sin_and_punishment_AuraScript();
+        }
+};
+
+class spell_pri_shadow_orb : public SpellScriptLoader
+{
+    public:
+        spell_pri_shadow_orb() : SpellScriptLoader("spell_pri_shadow_orb") { }
+
+        class spell_pri_shadow_orb_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_shadow_orb_SpellScript);
+
+            void HandleEffect(SpellEffIndex /*effIndex*/)
+            {
+                if(AuraEffect *pAuraEff = GetCaster()->GetAuraEffect(SPELL_PRIEST_SHADOW_ORB_MASTERY, EFFECT_0))
+                {
+                    if(Aura *pAura = GetCaster()->GetAura(SPELL_PRIEST_SHADOW_ORB))
+                    {
+                        uint32 damage = GetEffectValue();
+                        damage = GetCaster()->SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                        damage = GetHitUnit()->SpellDamageBonusTaken(GetCaster(), GetSpellInfo(), uint32(damage), SPELL_DIRECT_DAMAGE);
+                        uint32 stack = pAura->GetStackAmount() * 30;
+                        uint32 orbDmg = AddPct(stack, pAuraEff->GetAmount());
+                        damage = AddPct(damage, orbDmg);
+                        SetHitDamage(damage);
+                        GetCaster()->RemoveAura(SPELL_PRIEST_SHADOW_ORB);
+                    }
+                }
+                if(GetHitUnit()->HasAura(SPELL_PRIEST_MIND_SPIKE_AURA) && GetSpellInfo()->Id == SPELL_PRIEST_MIND_BLAST)
+                    GetHitUnit()->RemoveAura(SPELL_PRIEST_MIND_SPIKE_AURA);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_orb_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_ANY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_pri_shadow_orb_SpellScript();
+        }
+};
+
+
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_body_and_soul();
@@ -1320,4 +1566,9 @@ void AddSC_priest_spell_scripts()
     new spell_pri_archangel();
     new spell_pri_atonement();
     new spell_pri_atonement_heal();
+    new spell_pri_chakra();
+    new spell_pri_chakra_serenity();
+    new spell_pri_echo_of_light();
+    new spell_pri_sin_and_punishment();
+    new spell_pri_shadow_orb();
 }

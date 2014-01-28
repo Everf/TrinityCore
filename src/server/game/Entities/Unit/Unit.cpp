@@ -7084,6 +7084,23 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if(procSpell->Id != 2050 && procSpell->Id != 2061 && procSpell->Id != 2060)
                 return false;
             break;
+        // Orb of shadow
+        case 77486:
+            if(procSpell->Id != 589 && procSpell->Id != 15407)
+                return false;
+            break;
+        // Paralysis
+        case 87192:
+        case 87195:
+            if(procSpell->Id != 8092)
+                return false;
+            break;
+        // Mind melt
+        case 14910:
+        case 33371:
+            if(procSpell->Id != 73510)
+                return false;
+            break;
         // Deep Wounds
         case 12834:
         case 12849:
@@ -8648,6 +8665,15 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             case 4919:
             {
                 if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
+                    AddPct(DoneTotalMod, (*i)->GetAmount());
+                break;
+            }
+            case 21:
+            case 6918:
+            case 6935:
+            {
+                // Health at 50% or less (50% stored at effect 2 of the spell)
+                if (victim->HealthBelowPct(CalculateSpellDamage(this, (*i)->GetSpellInfo(), EFFECT_2)))
                     AddPct(DoneTotalMod, (*i)->GetAmount());
                 break;
             }
