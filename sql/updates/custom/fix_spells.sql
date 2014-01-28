@@ -67,7 +67,6 @@ INSERT INTO spell_script_names VALUES
 (81749, 'spell_pri_atonement'),
 (81751, 'spell_pri_atonement_heal');
 
-
 -- Inner focus remove aura
 DELETE FROM spell_linked_spell WHERE spell_trigger IN (2060, 596,2061,32546);
 INSERT INTO spell_linked_spell VALUES (2060, -89485, 0, 'Remove Inner focus');
@@ -78,3 +77,50 @@ INSERT INTO spell_linked_spell VALUES (32546, -89485, 0, 'Remove Inner focus');
 DELETE FROM spell_linked_spell WHERE spell_effect = -88688;
 INSERT INTO spell_linked_spell VALUES
 (101062, -88688, 0, 'Remove Surge of Light');
+
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_pri_chakra');
+INSERT INTO spell_script_names VALUES
+(33076, 'spell_pri_chakra'),
+(2060, 'spell_pri_chakra'),
+(2061, 'spell_pri_chakra'),
+(2050, 'spell_pri_chakra'),
+(596, 'spell_pri_chakra'),
+(73510, 'spell_pri_chakra'),
+(32546, 'spell_pri_chakra'),
+(585, 'spell_pri_chakra');
+
+DELETE FROM spell_script_names WHERE spell_id IN (88685, 81585,77485);
+INSERT INTO spell_script_names VALUES
+(77485, 'spell_pri_echo_of_light'),
+(81585, 'spell_pri_chakra_serenity'),
+(88685, 'spell_pri_holy_word_sanctuary');
+
+DELETE FROM spell_linked_spell WHERE spell_trigger = 14751;
+INSERT INTO spell_linked_spell VALUES
+(14751, -81208, 0, 'Remove other chakras'),
+(14751, -81206, 0, 'Remove other chakras'),
+(14751, -81209, 0, 'Remove other chakras'),
+(14751, 95644, 0, 'Visual aura');
+
+DELETE FROM spell_bonus_data WHERE entry IN (88686,139);
+INSERT INTO spell_bonus_data VALUES
+(88686, 0.043, 0, 0, 0, 'Priest - Holy word: Sanctuary'),
+(139, -1, 0.131, -1, -1, 'Priest - Renew');
+
+DELETE FROM spell_proc_event WHERE entry IN (77485,95740);
+INSERT INTO spell_proc_event VALUES
+(77485,0,0,0,0,0,0x00004000,0,0,0,0);
+
+DELETE FROM spell_proc_event WHERE entry IN (-33191,-87099);
+INSERT INTO spell_proc_event VALUES
+(-87099, 0, 0, 0, 0, 0, 0, 0x0000002, 0, 0, 0),
+(-33191, 0, 0, 0, 0, 0, 0, 0x0000002, 0, 0, 0);
+
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_pri_shadow_orb', 'spell_pri_sin_and_punishment');
+INSERT INTO spell_script_names VALUES
+(73510, 'spell_pri_shadow_orb'),
+(8092, 'spell_pri_shadow_orb'),
+(87100, 'spell_pri_sin_and_punishment'),
+(87099, 'spell_pri_sin_and_punishment');
+
+UPDATE spell_bonus_data SET direct_bonus = 0.316 WHERE entry = 32379;
