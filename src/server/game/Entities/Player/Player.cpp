@@ -4556,6 +4556,12 @@ bool Player::ResetTalents(bool no_cost)
                 RemoveAurasDueToSpell(mastery);
     }
 
+    if(getClass() == CLASS_PRIEST)
+    {
+        RemoveAurasDueToSpell(81209);
+        RemoveAurasDueToSpell(81208);
+        RemoveAurasDueToSpell(81206);
+    }
 
     SetPrimaryTalentTree(GetActiveSpec(), 0);
     SetFreeTalentPoints(talentPointsForLevel);
