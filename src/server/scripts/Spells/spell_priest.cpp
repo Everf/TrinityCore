@@ -1224,15 +1224,16 @@ class spell_pri_archangel : public SpellScriptLoader
                 {
                     stacks = pAura->GetStackAmount();
                     int32 bp = 3 * stacks;
-                    GetCaster()->CastSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_MANA, true);
+                    int32 bp1 = stacks;
                     GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_TRIGGERED, &bp, NULL, NULL, true);
+                    GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_MANA, &bp1, NULL, NULL, true);
                     GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_EVANGELISM_TRIGGERED_RANK_2);
                 }
                 else if (pAura = GetCaster()->GetAura(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2))
                 {
                     stacks = pAura->GetStackAmount();
                     int32 bp = 4 * stacks;
-                    int32 bp1 = 5;
+                    int32 bp1 = 5 * stacks;
                     GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_DARK_ARCHANGEL_TRIGGERED, &bp, &bp, NULL, true);
                     GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_ARCHANGEL_MANA, &bp1, NULL, NULL, true);
                     GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_DARK_EVANGELISM_TRIGGERED_RANK_2);

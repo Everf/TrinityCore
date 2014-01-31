@@ -124,3 +124,57 @@ INSERT INTO spell_script_names VALUES
 (87099, 'spell_pri_sin_and_punishment');
 
 UPDATE spell_bonus_data SET direct_bonus = 0.316 WHERE entry = 32379;
+
+DELETE FROM spell_proc_event WHERE entry IN (-31828,20177, 20179,26016,-53486, -53709);
+INSERT INTO spell_proc_event VALUES
+(-31828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8),
+(20177, 0, 4, 0, 0, 0, 0, 0x0000040, 0, 0, 0),
+(20179, 0, 4, 0, 0, 0, 0, 0x0000040, 0, 0, 0);
+
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_pal_judgement','spell_pal_word_of_glory','spell_pal_light_of_dawn','spell_pal_illuminated_healing','spell_pal_guardian_ancient_kings','spell_pal_inquisiton','spell_pal_tower_of_radiance','spell_pal_speed_of_light');
+INSERT INTO spell_script_names VALUES
+(76669, 'spell_pal_illuminated_healing'),
+(86150, 'spell_pal_guardian_ancient_kings'),
+(84963, 'spell_pal_inquisiton'),
+(-84800, 'spell_pal_tower_of_radiance'),
+(85222, 'spell_pal_light_of_dawn'),
+(85673, 'spell_pal_word_of_glory'),
+(20271,'spell_pal_judgement'),
+(498, 'spell_pal_speed_of_light');
+
+DELETE FROM spell_bonus_data WHERE entry IN (87188, 87189, 85222,53600,85673,96172);
+INSERT INTO spell_bonus_data VALUES
+(85222, 0.132, 0, 0, 0, 'Paladin - Light of Dawn'),
+(87188, 0.101, 0, 0, 0, 'Paladin - Enlightened Judgements Rank 1'),
+(87189, 0.202, 0, 0, 0, 'Paladin - Enlightened Judgements Rank 2'),
+(96172, 0, 0, 0, 0, 'Paladin - Hand of Light'),
+(85673, 0.209, 0.209, 0.198, 0, 'Paladin - Word of Glory'),
+(53600, 0, 0, 0.1, 0, 'Paladin - Shield of righteous');
+
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_pal_hand_of_light', 'spell_pal_exorcism','spell_pal_judgements_of_the_wise_and_bold', 'spell_pal_consecration','spell_pal_shield_of_righteous');
+INSERT INTO spell_script_names VALUES
+(76672, 'spell_pal_hand_of_light'),
+(53600, 'spell_pal_shield_of_righteous'),
+(31930, 'spell_pal_judgements_of_the_wise_and_bold'),
+(89906, 'spell_pal_judgements_of_the_wise_and_bold'),
+(26573, 'spell_pal_consecration');
+
+DELETE FROM spell_bonus_data WHERE entry IN (9799, 25988);
+INSERT INTO spell_bonus_data VALUES
+(9799, 0, 0, 0, 0, 'Paladin - Eye for an Eye Rank 1'),
+(25988, 0, 0, 0, 0, 'Paladin - Eye for an Eye Rank 1');
+
+UPDATE spell_proc_event SET procFlags = 0x00020000 WHERE entry = -9799;
+
+DELETE FROM spell_script_names WHERE ScriptName IN ('spell_pal_divine_purpose','spell_pal_pursuit_of_justice','spell_pal_holy_wrath','spell_pal_sanctified_wrath');
+INSERT INTO spell_script_names VALUES
+(85177, 'spell_pal_divine_purpose'),
+(86172, 'spell_pal_divine_purpose'),
+(26022, 'spell_pal_pursuit_of_justice'),
+(26023, 'spell_pal_pursuit_of_justice'),
+(2812, 'spell_pal_holy_wrath'),
+(31884, 'spell_pal_sanctified_wrath');
+
+DELETE FROM spell_proc_event WHERE entry IN (85285);
+INSERT INTO spell_proc_event VALUES
+(85285, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60);

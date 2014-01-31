@@ -5831,15 +5831,32 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
-            {
-                target = this;
-                triggered_spell_id = 31930;
-                break;
-            }
             switch (dummySpell->Id)
             {
+                // Judgements of the wise
+                case 31878:
+                {
+                    if(procSpell->Id != 54158 && procSpell->Id != 20187 && procSpell->Id != 31804)
+                        return false;
+                    target = this;
+                    triggered_spell_id = 31930;
+                    break;
+                }
+                // Judgements of the bold
+                case 89901:
+                {
+                    if(procSpell->Id != 54158 && procSpell->Id != 20187 && procSpell->Id != 31804)
+                        return false;
+                    target = this;
+                    triggered_spell_id = 89906;
+                    break;
+                }
+                // Selfless Healing
+                case 85803:
+                case 85804:
+                {
+                    return false;
+                }
                 // Sacred Shield
                 case 53601:
                 {
@@ -7045,6 +7062,33 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        // Sacred shield
+        case 85285:
+        {
+            basepoints0 = GetTotalAttackPowerValue(BASE_ATTACK) * 2.8;
+            if((GetHealth() - damage) > CountPctFromMaxHealth(30))
+                return false;
+            break;
+        }
+        // Sacred Duty
+        case 53709:
+        case 53710:
+            if(procSpell->Id != 54158 && procSpell->Id != 20187 && procSpell->Id != 31804 && procSpell->Id != 31935)
+                return false;
+            break;
+        // Vindication
+        case 26016:
+            if(procSpell->Id != 35395 && procSpell->Id != 53595)
+                return false;
+            break;
+        // Seal of Insight proc
+        case 20165:
+        {
+            int32 mana = GetCreateMana() * 0.04;
+            int32 hp = (GetTotalAttackPowerValue(BASE_ATTACK) * 0.15) + (SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.15);
+            CastCustomSpell(this, 20167, &hp, &mana, NULL, true);
+            return false;
+        }
         // Battle trance
         case 12322:
         case 85741:
@@ -7099,6 +7143,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 14910:
         case 33371:
             if(procSpell->Id != 73510)
+                return false;
+            break;
+        // Enlightened Judgements
+        case 53556:
+        case 53557:
+        // Seals of command
+        case 85126:
+            if(procSpell->Id != 54158 && procSpell->Id != 31804 && procSpell->Id != 20187)
                 return false;
             break;
         // Deep Wounds
